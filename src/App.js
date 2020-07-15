@@ -1,59 +1,116 @@
-import React from "react";
-// import React, { useState } from "react";
+import React, { Component } from "react";
 import "./App.css";
+import Radium from 'radium';
 import Person from "./Person/Person";
-import { Component } from "react";
 
-class App extends Component{
+class App extends Component {
   state = {
-        persons: [
-          {name: 'Max', age:29},
-          {name: 'Harry', age:30},
-          {name: 'John', age:31}
-        ],
-        otherState: "other state",
-        year: 1990
+    persons: [
+      {id: 'a1', name: "Max", age: 29 },
+      {id: 'b2', name: "Harry", age: 30 },
+      {id: 'c3', name: "John", age: 31 },
+    ],
+    otherState: "other state",
+    showPersons: false,
+  };
+
+  nameChangeHandler = (event, id) => {
+    const personIndex = this.state.persons.findIndex(p => {
+      return p.id === id;
+    });
+
+    const person = {
+      ...this.state.persons[personIndex]
+    }; 
+
+    person.name = event.target.value;
+    const persons = [...this.state.persons];
+    persons[personIndex] = person;
+
+    this.setState({
+      persons: [
+        { name: "MAX", age: 39 },
+        { name: event.target.value, age: 40 },
+        { name: "JOHN", age: 41 },
+      ],
+    });
+  };
+  
+  deletePersonHandler = (personIndex) => {
+    // const persons = this.state.persons.slice();
+    const persons = [...this.state.persons];
+    persons.splice(personIndex, 1);
+    this.setState=({persons: persons});
+  }
+
+  togglePersonsHandler = () => {
+    const doesShow = this.state.showPersons; // doesShow = false;
+    this.setState({ showPersons: !doesShow }); // then adjust the state => showPersons = true
+  };
+
+  render() {
+    const style = {
+      backgroundColor: 'lightcoral',
+      color: 'gray',
+      font: 'inherit',
+      border: '1px solid red',
+      padding: '8px',
+      cursor: 'pointer',
+      ':hover': {
+        backgroundColor: "red",
+        color: 'white',
+        transition: 'all .3s ease-in-out',
+        border: '1px solid #fff'
+      } 
+    };
+
+    let persons = null;
+    if (this.state.showPersons) {
+      persons = (
+        <div>
+          {this.state.persons.map((person, index) => {
+            return <Person 
+              click={() => this.deletePersonHandler(index)}
+              name={person.name}
+              age = {person.age}
+              key = {person.id}
+              changed = {(event) => this.nameChangeHandler(event, person.id)}
+            />
+          })}
+
+        </div>
+      );
+      
+      style.backgroundColor = 'lightgreen';
+      style[':hover']={
+          backgroundColor: "salmon",
+          color: 'white',
+          transition: 'all .3s ease-in-out',
+          border: '1px solid #fff'
       }
+    }
 
-  handLingEvent = (newName) => {
-    // this.state.persons[0].name = this.state.persons[1].name; => DO NOT do this
-    this.setState({
-      persons: [
-        {name: newName, age:39},
-        {name: 'HARRY', age:40},
-        {name: 'JOHN', age:41}
-      ]
-    });
-  }
+    let classes = [];
 
-  newChangeHandler = (event) => {
-    this.setState({
-      persons: [
-        {name: 'MAX', age:39},
-        {name: event.target.value, age:40},
-        {name: 'JOHN', age:41}
-      ]
-    });
-  }
+    if(this.state.persons.length <= 2){
+      classes.push('red'); // classes = ['red']
+     }
+     if(this.state.persons.length <= 1){
+      classes.push('bold'); // classes = ['red' ,'bold']
+     }
 
-  render(){
     return (
       <div className="App">
-        <h1> React App</h1>
-        <button onClick={this.handLingEvent.bind(this, 'MAX')}>Switch name</button>
-        <Person name={this.state.persons[0].name} age={this.state.persons[0].age}/>
-        <Person 
-        name={this.state.persons[1].name} 
-        age={this.state.persons[1].age} 
-        clickMe={this.handLingEvent.bind(this, 'Maxxxx')}
-        changed={this.newChangeHandler}>CLICK ME</Person>
-        <Person name={this.state.persons[2].name} age={this.state.persons[2].age}/>
+        <h1 className={classes}> React App</h1>
+        <button onClick={this.togglePersonsHandler} style={style}>Switch name</button>
+
+        {persons}
       </div>
     );
   }
 }
 
-export default App;
+export default Radium(App);
 
 // const App = props => {
 //   const [personsState, setPersonsState] = useState({
@@ -66,13 +123,11 @@ export default App;
 //     otherState: "other state",
 //   });
 
-
 //   // const [firstElement, secondElement] = useState()
 
 //   // first element (persons Object) will always be current state
 //   // &
 //   // second element is a function that allows to update this state and will re-render components
-
 
 //   console.log(personsState);
 //   const handLingEvent = (newName) => {
